@@ -1,9 +1,7 @@
-Introduction
+##Introduction
 Hello Everyone!! This is first ever right writeup and today we are going to solve a box named as “Lame” which is a lab presented by HackTheBox.
 
 Level: Beginners
-
-Let’s begin the Game!!
 
 Since these labs are online available therefore they have static IP and IP of Lame is 10.10.10.3 so let’s begin with nmap port enumeration.
 
@@ -13,12 +11,13 @@ Target Machine Information:
 Hostname : LAME
 IP Address : 10.10.10.3
 OS : Linux
+
 Overview:
 In this walkthough, I will be showing how to root the machine without using the metasploit method as most of the walkthrough used the automated way.
 
-# Reconnaissance
-## Nmap
+### Reconnaissance
 
+## Nmap
 nmap -T4 -A -p- 10.10.10.3
 ```bash
 Starting Nmap 7.91 ( https://nmap.org ) at 2021-06-23 04:00 EDT
@@ -85,6 +84,7 @@ Nmap done: 1 IP address (1 host up) scanned in 215.88 seconds
 * Samba (TCP-443)
 * distccd (TCP-3632)
 * Host: Samba 3.0.20-Debian
+
 
 ## Enumaration
 
@@ -177,4 +177,4 @@ So this was my first of the many more upcoming writeup’s from the list. So, Ke
 
 Any type of feedback or suggestions are appreciated.
 
-You can reach out to me on : ---
+You can reach out to me on : Twitter: @saquibsaifee
